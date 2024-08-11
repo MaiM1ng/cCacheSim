@@ -1,12 +1,11 @@
-#include <algorithm>
 #include <cache/CacheExec.h>
+#include <cache/ReplacementStrategy.h>
 #include <common.h>
 #include <cstdint>
 #include <cstdio>
 #include <fcntl.h>
 #include <getopt.h>
 #include <instflow/instflow.h>
-#include <iostream>
 #include <string>
 #include <string_view>
 #include <sys/mman.h>
@@ -122,18 +121,14 @@ void init_engine(int argc, char *argv[]) {
 }
 
 void engine_loop() {
-  CacheExec cache(4, 16);
+  CacheExec cache(16, 1, 4, FIFO_MAP);
 
   cache.show_cache_config();
 
-  for (uint64_t i = 0; i < inst_flow.nr_inst; i++) {
-  // for (uint64_t i = 0; i < 30; i++) {
-    uint32_t inst = inst_flow.inst_records[i];
-    // printf("inst: %x\n", inst);
+  for (cache.pc = 0; cache.pc < inst_flow.nr_inst; cache.pc++) {
+    uint32_t inst = inst_flow.inst_records[cache.pc];
     cache.exec_once(inst);
   }
-
-  
 
   cache.show_cache_perf();
 }

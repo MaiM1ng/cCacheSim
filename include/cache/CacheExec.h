@@ -1,18 +1,17 @@
 #ifndef __CACHE_EXEC_H
 #define __CACHE_EXEC_H
 
-#include <algorithm>
 #include <cache/CacheBase.h>
-#include <cache/CacheExec.h>
 #include <cache/CachePerf.h>
+#include <cache/ReplacementStrategy.h>
 #include <cmath>
 #include <common.h>
 #include <cstdint>
-#include <vector>
 
 class CacheExec {
 public:
-  CacheExec(size_t line_size, size_t line_num) : cache(line_size, line_num) {
+  CacheExec(size_t line_size, size_t way_num, size_t block_num, int strategy_id)
+      : cache(line_size, way_num, block_num, strategy_id) {
     this->pc = 0;
   }
 
@@ -21,6 +20,8 @@ public:
   void show_cache_perf() { this->perf.show_perf(); }
 
   void exec_once(uint32_t inst) {
+    this->cache.add_counter();
+
     if (cache.check_in_cache(inst)) {
       // Hit
       this->perf.add_hit();
@@ -29,14 +30,14 @@ public:
       cache.update_cache(inst);
       this->perf.add_miss();
     }
-
-    this->pc += 1;
   }
+
+public:
+  uint64_t pc;
 
 private:
   CacheBase cache;
   CachePerf perf;
-  uint64_t pc;
 };
 
 #endif
