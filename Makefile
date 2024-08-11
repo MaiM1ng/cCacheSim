@@ -37,6 +37,12 @@ DEPS := $(OBJS:.o=.d)
 # create build dir
 $(shell mkdir -p $(BUILD_DIR))
 
+# set args
+IMG_FILE := ./img/itrace
+LOG_DIR  := ./build/log
+CACHESIM_ARGS += -i $(IMG_FILE)
+CACHESIM_ARGS += -l $(LOG_DIR)
+
 default: build
 
 test:

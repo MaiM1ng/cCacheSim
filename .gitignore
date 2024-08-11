@@ -1,4 +1,6 @@
 build
 compile_commands.json
 img
-.cache
+.vscode/
+.metals/
+.cache/

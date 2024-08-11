@@ -45,6 +45,19 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "iostream": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "csignal": "cpp",
+        "ctime": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "ratio": "cpp",
+        "iomanip": "cpp",
+        "semaphore": "cpp",
+        "sstream": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
+    },
+    "files.watcherExclude": {
+        "**/target": true
     }
 }

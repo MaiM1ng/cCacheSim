@@ -3,7 +3,9 @@
 #include <common.h>
 #include <cstdint>
 #include <cstdio>
+#include <engine/task.h>
 #include <fcntl.h>
+#include <filesystem>
 #include <getopt.h>
 #include <instflow/instflow.h>
 #include <string>
@@ -13,7 +15,7 @@
 
 static char *input_file = NULL;
 static char *output_file = NULL;
-static char *log_file = NULL;
+char *log_dir = NULL;
 
 void init_input_file(char *in) {
   if (in == NULL) {
@@ -70,7 +72,17 @@ void init_input_file(char *in) {
   printf("last : %x\n", inst_flow.inst_records[inst_flow.nr_inst - 1]);
 }
 
-void init_log(char *log) {}
+void init_log(char *log_dir) {
+  std::filesystem::path dir_path(log_dir);
+
+  if (!std::filesystem::exists(dir_path)) {
+    if (!std::filesystem::create_directory(dir_path)) {
+      exit(1);
+    }
+  }
+
+  printf("Log in: %s\n", log_dir);
+}
 
 void init_output_file(char *out) {}
 
@@ -93,7 +105,7 @@ static int parse_args(int argc, char *argv[]) {
       output_file = optarg;
       break;
     case 'l':
-      log_file = optarg;
+      log_dir = optarg;
       break;
     default:
       exit(0);
@@ -115,20 +127,21 @@ void init_engine(int argc, char *argv[]) {
 
   init_output_file(output_file);
 
-  init_log(log_file);
+  init_log(log_dir);
 
   welcome();
 }
 
 void engine_loop() {
-  CacheExec cache(16, 1, 4, FIFO_MAP);
+  // CacheExec cache(4, 1, 16, FIFO_MAP);
 
-  cache.show_cache_config();
+  // cache.show_cache_config();
 
-  for (cache.pc = 0; cache.pc < inst_flow.nr_inst; cache.pc++) {
-    uint32_t inst = inst_flow.inst_records[cache.pc];
-    cache.exec_once(inst);
-  }
+  // for (cache.pc = 0; cache.pc < inst_flow.nr_inst; cache.pc++) {
+  //   uint32_t inst = inst_flow.inst_records[cache.pc];
+  //   cache.exec_once(inst);
+  // }
 
-  cache.show_cache_perf();
+  // cache.show_cache_perf();
+  task_create_and_run();
 }

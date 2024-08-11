@@ -30,10 +30,11 @@ public:
     this->line_offset_width = log2(this->line_size / WORD_BYTES);
 
     uint64_t index_width = log2(this->block_num);
+    this->isHaveIndex = index_width != 0;
     this->index_start = 2 + this->line_offset_width;
     this->index_end = this->index_start + index_width - 1;
 
-    uint64_t tag_width = 32 - 2 - index_width;
+    uint64_t tag_width = 32 - 2 - index_width - this->line_offset_width;
     this->tag_start = this->index_end + 1;
     this->tag_end = this->tag_start + tag_width - 1;
 
@@ -71,7 +72,9 @@ public:
 
   bool check_in_cache(uint32_t inst) {
     uint32_t tag = BITS(inst, this->tag_end, this->tag_start);
-    uint32_t idx = BITS(inst, this->index_end, this->index_start);
+    uint32_t idx;
+    if (this->isHaveIndex) idx = BITS(inst, this->index_end, this->index_start);
+    else idx = 0;
 
     for (size_t i = 0; i < this->way_num; i++) {
       if (this->tag[idx][i] == tag && this->valid[idx][i] == 1) {
@@ -84,8 +87,11 @@ public:
   }
 
   void update_cache(uint32_t inst) {
+    uint32_t idx;
+    if (this->isHaveIndex) idx = BITS(inst, this->index_end, this->index_start);
+    else idx = 0;
+    
     uint32_t tag = BITS(inst, this->tag_end, this->tag_start);
-    uint32_t idx = BITS(inst, this->index_end, this->index_start);
     size_t in_block_idx =
         this->strategy->selectVictim(this->valid[idx], this->counter[idx]);
 
@@ -107,21 +113,27 @@ public:
     }
   }
 
-  void show() {
-    printf("Cache Config:\n");
-    printf("=============\n");
-    printf("Cache Line Size : %lu\n", this->line_size);
-    printf("Cache Block Num : %lu\n", this->block_num);
-    printf("Cache Way Num   : %lu\n", this->way_num);
-    printf("Cache Map Way   : %s\n", this->strategy->getName());
+  void show(FILE *fp) {
+    fprintf(fp, "Cache Config:\n");
+    fprintf(fp, "=============\n");
+    fprintf(fp, "Cache Block Num : %lu\n", this->block_num);
+    fprintf(fp, "Cache Line Size : %lu\n", this->line_size);
+    fprintf(fp, "Cache Way Num   : %lu\n", this->way_num);
+    fprintf(fp, "Cache Map Way   : %s\n", this->strategy->getName());
 
-    printf("offset range: [ 1: 0]\n");
-    printf("index  range: [%02lu:%02lu]\n", this->index_end, this->index_start);
-    printf("tag    range: [%02lu:%02lu]\n", this->tag_end, this->tag_start);
-    printf("=============\n");
+    fprintf(fp, "offset range:      [ 1: 0]\n");
+    fprintf(fp, "line offset width:     %lu\n", this->line_offset_width);
+    if (this->isHaveIndex) {
+      fprintf(fp, "index  range:      [%02lu:%02lu]\n", this->index_end, this->index_start);
+    } else {
+      fprintf(fp, "index  range:      None\n");
+    }
+    fprintf(fp, "tag    range:      [%02lu:%02lu]\n", this->tag_end, this->tag_start);
+    fprintf(fp, "=============\n");
   }
 
   std::shared_ptr<ReplacementStrategy> strategy;
+  bool isHaveIndex;
 
 private:
   size_t line_size;

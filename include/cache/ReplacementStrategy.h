@@ -12,6 +12,8 @@ enum {
   RANDOM_MAP,
   LRU_MAP,
   FIFO_MAP,
+
+  NR_STRATEGY
 };
 
 class ReplacementStrategy {

@@ -12,14 +12,14 @@ public:
     this->cnt_miss = 0;
   }
 
-  void show_perf() {
-    printf("Cache Perf:\n");
-    printf("=============\n");
-    printf("Miss: %lu\n", this->cnt_miss);
-    printf("Hit : %lu\n", this->cnt_hit);
-    printf("Hit Rate: %lf\n",
+  void show_perf(FILE* fp) {
+    fprintf(fp, "Cache Perf:\n");
+    fprintf(fp, "=============\n");
+    fprintf(fp, "Miss: %lu\n", this->cnt_miss);
+    fprintf(fp, "Hit : %lu\n", this->cnt_hit);
+    fprintf(fp, "Hit Rate: %lf\n",
            (double)this->cnt_hit / (this->cnt_hit + this->cnt_miss));
-    printf("=============\n");
+    fprintf(fp, "=============\n");
   }
 
   void add_miss() { this->cnt_miss += 1; }
